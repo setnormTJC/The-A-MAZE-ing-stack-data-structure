@@ -1,5 +1,4 @@
-// The A-MAZE-ing stack data structure.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+//requires C++17
 
 #include<array> 
 #include <iostream>
@@ -59,18 +58,6 @@ std::pair<int, int> getLocationOfCharacterIn2DMaze(const std::vector<std::vector
 	return charactersRowAndColumn; //this will be -1, -1
 }
 
-//std::array<char, 4> getNeighbors(const std::pair<int, int>& currentRowAndColumn, const std::vector<std::vector<char>>& maze)
-//{
-//	std::array<char, 4> neighbors; 
-//	neighbors[0] = maze[currentRowAndColumn.first - 1][currentRowAndColumn.second]; //above
-//	//structured bindings approach for more readable code? 
-//	neighbors[1] = maze[currentRowAndColumn.first + 1][currentRowAndColumn.second]; //below
-//	neighbors[2] = maze[currentRowAndColumn.first][currentRowAndColumn.second - 1]; //left
-//	neighbors[3] = maze[currentRowAndColumn.first][currentRowAndColumn.second + 1]; //right
-//
-//	return neighbors; 
-//}
-
 
 std::map<std::string, char> getMapOfNeighbors(const std::pair<int, int>& currentRowAndColumn, const std::vector<std::vector<char>>& maze)
 {
@@ -88,8 +75,8 @@ std::map<std::string, char> getMapOfNeighbors(const std::pair<int, int>& current
 /*Picks the first neighbor that is not a wall or a 'V' (as in "visited")*/
 void addNextMoveToStackOfDirections(const std::map<std::string, char>& mapOfNeighbors, std::stack<std::string>& stackOfDirections)
 {
-
-	for (const auto& [direction, neighborInThatDirection]  : mapOfNeighbors)
+#if _MSVC_LANG >= 201703L
+	for (const auto& [direction, neighborInThatDirection]  : mapOfNeighbors) //"structured bindings"
 	{
 		if (neighborInThatDirection != '#' && neighborInThatDirection != 'V')
 		{
@@ -97,6 +84,10 @@ void addNextMoveToStackOfDirections(const std::map<std::string, char>& mapOfNeig
 			return; 
 		}
 	}
+#else 
+	throw std::exception("C++17 is REQUIRED to run this program");
+#endif
+
 
 	//Q: Now what does it mean if all neighbors are either a wall ('#') OR have been previously visited? 
 	//A: Dead end and need to backtrack, I think: 
@@ -211,7 +202,15 @@ int main()
 	//std::cout << "Row count: " << maze.size() << "\nColumn count: " << maze[0].size() << "\n";
 	//printMaze(maze); 
 
-	traverseMaze(maze); 
+	try
+	{
+		traverseMaze(maze); 
+	}
+
+	catch (const std::exception& e)
+	{
+		std::cout << e.what() << "\n";
+	}
 
 
 }
