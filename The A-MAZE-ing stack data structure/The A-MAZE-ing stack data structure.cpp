@@ -100,10 +100,12 @@ void addNextMoveToStackOfDirections(const std::map<std::string, char>& mapOfNeig
 
 	//Q: Now what does it mean if all neighbors are either a wall ('#') OR have been previously visited? 
 	//A: Dead end and need to backtrack, I think: 
-	
+
+	//cue the music: "Dead end, dead end, dead end!"
+
+
 	//stackOfDirections.pop(); 
 
-	//fill me out ... 
 }
 
 /*Updates the maze by placing a 'V' in previous position and a 'C' in next (new) position */
@@ -174,6 +176,8 @@ void traverseMaze(std::vector<std::vector<char>> maze)
 
 		printMaze(maze);
 		std::cout << "\n\n";
+
+		
 
 	}
 
