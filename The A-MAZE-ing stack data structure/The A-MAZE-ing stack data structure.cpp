@@ -8,7 +8,7 @@ int main()
 	std::vector<std::string> stringMaze = 
 	{
 		"##################",
-		"#S   #       #   #",
+		"#S           #   #", //changed from 		"#S   #       #   #",
 		"### # ### ### # ##",
 		"#   #   #   # #  #",
 		"# ### ### # # ## #",

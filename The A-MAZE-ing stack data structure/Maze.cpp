@@ -112,7 +112,6 @@ void backtrack(std::vector<std::vector<char>>& maze, std::stack<std::string>& st
 
 		//now move, check if still at a dead end, then make recursive call: 
 		std::cout << "\t\t\tBACKTRACKING " << backtrackingDirection << "\n"; 
-		//remove "to the" -> sounds dumb
 
 		moveToNextPosition(maze, currentRowAndColumn, backtrackingDirection);
 		printMaze(maze); 
@@ -164,42 +163,26 @@ void moveToNextPosition(std::vector<std::vector<char>>& maze, std::pair<int, int
 	int currentRow = currentRowAndColumn.first;
 	int currentCol = currentRowAndColumn.second;
 
-	maze[currentRow][currentCol] = 'V';
+	maze[currentRow][currentCol] = 'V'; // Mark as visited before moving
 
-	if (nextDirection == "Up")
+	if (nextDirection == "Up" && maze[currentRow - 1][currentCol] != '#')
 	{
-		maze[currentRow - 1][currentCol] = 'C';
 		currentRowAndColumn = { currentRow - 1, currentCol };
 	}
-
-	else if (nextDirection == "Down")
+	else if (nextDirection == "Down" && maze[currentRow + 1][currentCol] != '#')
 	{
-		maze[currentRow + 1][currentCol] = 'C';
 		currentRowAndColumn = { currentRow + 1, currentCol };
 	}
-
-	else if (nextDirection == "Left")
+	else if (nextDirection == "Left" && maze[currentRow][currentCol - 1] != '#')
 	{
-		maze[currentRow][currentCol - 1] = 'C';
 		currentRowAndColumn = { currentRow, currentCol - 1 };
 	}
-
-	else if (nextDirection == "Right")
+	else if (nextDirection == "Right" && maze[currentRow][currentCol + 1] != '#')
 	{
-		if (maze[currentRow][currentCol + 1] == '#') //just a silly, temporary debugging thing
-		{
-			std::cout << "No busting through walls, Kool-aid man!\n";
-			__debugbreak(); 
-		}
-		maze[currentRow][currentCol + 1] = 'C';
 		currentRowAndColumn = { currentRow, currentCol + 1 };
 	}
 
-	else
-	{
-		std::cout << "again, how did you get here?\n";
-		__debugbreak();
-	}
+	maze[currentRowAndColumn.first][currentRowAndColumn.second] = 'C'; // Mark new position
 }
 
 void traverseMaze(std::vector<std::vector<char>> maze)
