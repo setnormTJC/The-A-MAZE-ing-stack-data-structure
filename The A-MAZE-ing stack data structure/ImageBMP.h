@@ -142,6 +142,7 @@ public:
 
 	void setPixelToColor_withThickness(unsigned int x, unsigned int y, const Color& color, unsigned int thickness);
 
+	void drawLine(int x0, int y0, int xf, int yf, const Color& color);
 
 	void writeImageFile(std::string filename);
 };
@@ -151,12 +152,25 @@ class MazeImageBMP : public ImageBMP
 private: 
 	const int PIXELS_PER_MAZE_STEP = 75; 
 
+	ImageBMP stickMan; 
+	/*Anticipate upArrow getting rotated to appropriate direction*/
+	ImageBMP upArrow; 
+
 public: 
-	MazeImageBMP() = default;
+	/*reads in the stickman.bmp image*/
+	MazeImageBMP();
+
 	//MazeImageBMP(const int numberOfRowsInMaze, const int numberOfColumnsInMaze);
 	void setMazeImageDimensions(const int numberOfRowsInMaze, const int numberOfColumnsInMaze, const ColorEnum& fillColor);
 
-	void draw(const std::vector<std::vector<char>>& maze);
+	void drawMaze(const std::vector<std::vector<char>>& maze, const std::map< std::pair<int, int>, std::string>& rowAndColumnToMoveDirection);
+
+	void drawStickFigure(int x0, int y0);
+
+	/*The upArrow member variable is, shockingly, oriented UP by default. @param arrowDirection -> a single counter clockwise rotation gets applied if this is "Left" */
+	void drawArrow(int x0, int y0, const std::string& arrowDirection);
+
+
 };
 
 #pragma region auxiliary functions 
@@ -164,5 +178,7 @@ std::vector<std::vector<char>> rotateMatrixClockwise
 (std::vector<std::vector<char>>& originalMatrix, int originalNumberOfRows, int originalNumberOfCols);
 
 std::vector<std::vector<int>> rotateIntMatrixClockwise(std::vector<std::vector<int>>& originalMatrix, int originalNumberOfRows, int originalNumberOfCols);
+
+std::vector<std::vector<Color>> rotateColorMatrixCounterClockwise(std::vector<std::vector<Color>>& originalMatrix, int originalNumberOfRows, int originalNumberOfCols);
 
 #pragma endregion

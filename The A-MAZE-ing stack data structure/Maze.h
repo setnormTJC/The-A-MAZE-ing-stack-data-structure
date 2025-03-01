@@ -19,6 +19,9 @@ private:
 	std::stack<std::string> stackOfDirections;
 	std::map<std::string, char> mapOfNeighbors;
 
+	/*Ex: moved Right from (1, 1)*/
+	std::map< std::pair<int, int>, std::string> rowAndColumnToMoveDirection; 
+
 	bool needToBacktrack = false; 
 
 	//For visualization (and fun): 

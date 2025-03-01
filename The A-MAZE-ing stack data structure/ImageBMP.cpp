@@ -578,6 +578,27 @@ void ImageBMP::setPixelToColor_withThickness(unsigned int x, unsigned int y, con
 
 }
 
+void ImageBMP::drawLine(int x0, int y0, int xf, int yf, const Color& color)
+{
+	if (yf - y0 == 0) //do not calculate an infinite slope (vertical line)
+	{
+		for (int row = x0; row < xf; ++row)
+		{
+			ImageBMP::pixelData.pixelMatrix[row][y0] = color; 
+		}
+		return; //"you can go no further" 
+	}
+
+	int slope = (yf - y0) / (xf - x0);
+
+
+	for (int row = x0; row < xf; ++row)
+	{
+		int y = slope * row + y0;
+		pixelData.pixelMatrix[row][y] = color; 
+	}
+}
+
 
 unsigned int InfoHeader::getInfoHeaderSize() const
 {
@@ -652,7 +673,6 @@ std::vector<std::vector<char>> rotateMatrixClockwise
 		}
 	}
 
-
 	return rotatedMatrix;
 }
 
@@ -677,8 +697,35 @@ std::vector<std::vector<int>> rotateIntMatrixClockwise
 
 	return rotatedMatrix;
 }
+std::vector<std::vector<Color>> rotateColorMatrixCounterClockwise(std::vector<std::vector<Color>>& originalMatrix, int originalNumberOfRows, int originalNumberOfCols)
+{
+	std::vector<std::vector<Color>> rotatedMatrix;
+
+	//note the switched order of rows and cols: 
+	rotatedMatrix.resize(originalNumberOfCols, std::vector<Color>(originalNumberOfRows));
+
+	for (int row = 0; row < originalNumberOfRows; ++row)
+	{
+		for (int col = 0; col < originalNumberOfCols; ++col)
+		{
+			//I didn't work through this equation - only walked through in debug mode...
+			rotatedMatrix[col][originalNumberOfRows - 1 - row] = originalMatrix[row][col];
+		}
+	}
+
+
+	return rotatedMatrix;
+}
 #pragma endregion 
 
+
+
+MazeImageBMP::MazeImageBMP()
+{
+	stickMan.readImageBMP("stickMan.bmp");
+
+	upArrow.readImageBMP("upArrow.bmp");
+}
 
 void MazeImageBMP::setMazeImageDimensions(const int numberOfRowsInMaze, const int numberOfColumnsInMaze, const ColorEnum& fillColor)
 {
@@ -705,7 +752,7 @@ void MazeImageBMP::setMazeImageDimensions(const int numberOfRowsInMaze, const in
 	}
 }
 
-void MazeImageBMP::draw(const std::vector<std::vector<char>>& maze)
+void MazeImageBMP::drawMaze(const std::vector<std::vector<char>>& maze, const std::map< std::pair<int, int>, std::string>& rowAndColumnToMoveDirection)
 {
 	int counter = 0; 
 
@@ -720,6 +767,7 @@ void MazeImageBMP::draw(const std::vector<std::vector<char>>& maze)
 
 			if (currentChar == 'W') //wall
 			{
+
 				fillRectangleWithColor(x0, y0, PIXELS_PER_MAZE_STEP, PIXELS_PER_MAZE_STEP, Color(ColorEnum::Magenta));
 				drawRectangleOutline(x0, y0, PIXELS_PER_MAZE_STEP, PIXELS_PER_MAZE_STEP, Color(ColorEnum::Black));
 			}
@@ -731,12 +779,33 @@ void MazeImageBMP::draw(const std::vector<std::vector<char>>& maze)
 
 			else if (currentChar == 'V')
 			{
-				fillRectangleWithColor(x0, y0, PIXELS_PER_MAZE_STEP, PIXELS_PER_MAZE_STEP, Color(ColorEnum::Black));
+				//first, paint over previous contents (the stick figure): 
+				fillRectangleWithColor(x0, y0, PIXELS_PER_MAZE_STEP, PIXELS_PER_MAZE_STEP, Color(ColorEnum::Cyan));
+
+				const std::pair<int, int> position = { row, col };
+
+				if (rowAndColumnToMoveDirection.find(position) != rowAndColumnToMoveDirection.end())
+				{
+					std::string theDirectionMoved = rowAndColumnToMoveDirection.at(position);
+
+					drawArrow(x0, y0, theDirectionMoved);
+					
+				}
+
+
+				//if (lastMovementDirection == "Right")
+				//{
+				//	drawArrow(x0, y0);
+				//}
+				// 
+				//fillRectangleWithColor(x0, y0, PIXELS_PER_MAZE_STEP, PIXELS_PER_MAZE_STEP, Color (130, 0, 0)); //this is dark blue
 			}
 
 			else if (currentChar == 'C') //current
 			{
-				fillRectangleWithColor(x0, y0, PIXELS_PER_MAZE_STEP, PIXELS_PER_MAZE_STEP, Color(ColorEnum::Red));
+				drawStickFigure(x0, y0); 
+
+				//fillRectangleWithColor(x0, y0, PIXELS_PER_MAZE_STEP, PIXELS_PER_MAZE_STEP, Color(ColorEnum::Red));
 			}
 
 			else if (currentChar == 'E') //end
@@ -757,3 +826,81 @@ void MazeImageBMP::draw(const std::vector<std::vector<char>>& maze)
 		}
 	}
 }
+
+void MazeImageBMP::drawStickFigure(int x0, int y0)
+{
+	std::swap(x0, y0); //stupid, but ah well -> images use image[row][col], where row is y value and col is x value
+
+	int stickManWidth = stickMan.pixelData.pixelMatrix[0].size();
+	int stickManHeight = stickMan.pixelData.pixelMatrix.size();
+
+	for (int row = x0; row < x0 + stickManHeight; ++row)
+	{
+		for (int col = y0; col < y0 + stickManWidth; ++col)
+		{
+			pixelData.pixelMatrix[row][col] = stickMan.pixelData.pixelMatrix[row - x0][col - y0];
+		}
+	}
+}
+
+void MazeImageBMP::drawArrow(int x0, int y0, const std::string& arrowDirection)
+{
+	std::swap(x0, y0); 
+	
+	std::vector<std::vector<Color>> originalMatrix = upArrow.pixelData.pixelMatrix; //copy so no modifying the O.G.
+	std::vector<std::vector<Color>> rotatedMatrix; 
+
+	if (arrowDirection == "Down") //two rotations from initial "Up direction" 
+	{
+		rotatedMatrix = rotateColorMatrixCounterClockwise(originalMatrix, originalMatrix.size(), originalMatrix[0].size());
+		//NOTE the use of rotatedMatrix below:
+		rotatedMatrix = rotateColorMatrixCounterClockwise(rotatedMatrix, rotatedMatrix.size(), rotatedMatrix[0].size());
+	}
+
+	else if (arrowDirection == "Left")
+	{
+		rotatedMatrix = rotateColorMatrixCounterClockwise(originalMatrix, originalMatrix.size(), originalMatrix[0].size());
+	}
+
+	else if (arrowDirection == "Right")
+	{
+		rotatedMatrix = rotateColorMatrixCounterClockwise(originalMatrix, originalMatrix.size(), originalMatrix[0].size());
+		rotatedMatrix = rotateColorMatrixCounterClockwise(rotatedMatrix, rotatedMatrix.size(), rotatedMatrix[0].size());
+		rotatedMatrix = rotateColorMatrixCounterClockwise(rotatedMatrix, rotatedMatrix.size(), rotatedMatrix[0].size());
+	}
+
+	else if (arrowDirection == "Up")
+	{
+		//no rotation needed: 
+		rotatedMatrix = originalMatrix; 
+	}
+
+	int arrowWidth = rotatedMatrix[0].size();
+	int arrowHeight = rotatedMatrix.size();
+
+	for (int row = x0; row < x0 + arrowHeight; ++row)
+	{
+		for (int col = y0; col < y0 + arrowWidth; ++col)
+		{
+			this->pixelData.pixelMatrix[row][col] = rotatedMatrix[row - x0][col - y0]; //using this for "clarity" 
+		}
+	}
+
+	//previous approach below: 
+	//int arrowWidth = upArrow.pixelData.pixelMatrix[0].size(); 
+	//int arrowHeight = upArrow.pixelData.pixelMatrix.size(); 
+
+	//for (int row = x0; row < x0 + arrowHeight; ++row)
+	//{
+	//	for (int col = y0; col < y0 + arrowWidth; ++col)
+	//	{
+	//		pixelData.pixelMatrix[row][col] = upArrow.pixelData.pixelMatrix[row - x0][col - y0];
+	//	}
+	//}
+	
+}
+
+
+
+
+

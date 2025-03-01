@@ -43,7 +43,7 @@ int main()
 	{
 		Maze maze(stringMaze); 
 
-		maze.traverseMaze(); 
+ 		maze.traverseMaze(); 
 	}
 
 	catch (const std::exception& e)

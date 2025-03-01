@@ -198,25 +198,34 @@ void Maze::traverseMaze()
 		if (isNewMoveAvailable)
 		{
 			std::cout << "Moving " << stackOfDirections.top() << "\n";
-			//std::cin.get(); 
+	
+			rowAndColumnToMoveDirection.insert({ currentRowAndColumn, stackOfDirections.top() });
+			//auto previousRowAndColumn = currentRowAndColumn; //for showing direction of movement in image of maze
+
 			moveToNextPosition(stackOfDirections.top());
 
-			//printMaze();
-			//std::cout << "\n\n";
-
-			mazeImage.draw(maze); 
+			mazeImage.drawMaze(maze, rowAndColumnToMoveDirection);
 
 			const char* mazeImageFilename = "mazey.bmp";
 			mazeImage.writeImageFile(mazeImageFilename);
 
+			std::cout << "Any key to continue\n";
+			std::cin.get();
+
 			system(mazeImageFilename);
 
+
+			//printMaze();
+			//std::cout << "\n\n";
 
 		}
 
 		else
 		{
 			std::cout << "\t\t\t\tDead end, dead end, dead end!\n";
+
+
+
 			needToBacktrack = true;
 			backtrack();
 		}
@@ -232,15 +241,17 @@ Maze::Maze(const std::vector<std::string>& stringMaze)
 	currentRowAndColumn = getLocationOfCharacterIn2DMaze('S');
 	goalRowAndColumn = getLocationOfCharacterIn2DMaze('E');
 
+
 	//the image file stuff: 
 	mazeImage.setMazeImageDimensions( maze.size(), maze[0].size(), ColorEnum::Cyan);
 	
 
-	mazeImage.draw(maze); 
+	mazeImage.drawMaze(maze, {});//!
 
 	const char* mazeImageFilename = "mazey.bmp"; 
 	mazeImage.writeImageFile(mazeImageFilename); 
 
+	//display starting maze: 
 	system(mazeImageFilename);
 
 }
