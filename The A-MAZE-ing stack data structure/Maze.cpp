@@ -204,15 +204,15 @@ void Maze::traverseMaze()
 
 			moveToNextPosition(stackOfDirections.top());
 
-			mazeImage.drawMaze(maze, rowAndColumnToMoveDirection);
+			//mazeImage.drawMaze(maze, rowAndColumnToMoveDirection);
 
-			const char* mazeImageFilename = "mazey.bmp";
-			mazeImage.writeImageFile(mazeImageFilename);
+			//const char* mazeImageFilename = "mazey.bmp";
+			//mazeImage.writeImageFile(mazeImageFilename);
 
-			std::cout << "Any key to continue\n";
-			std::cin.get();
+			//std::cout << "Any key to continue\n";
+			//std::cin.get();
 
-			system(mazeImageFilename);
+			//system(mazeImageFilename);
 
 
 			//printMaze();
@@ -224,7 +224,29 @@ void Maze::traverseMaze()
 		{
 			std::cout << "\t\t\t\tDead end, dead end, dead end!\n";
 
+			const char* callLights = "DeadEnd-Lightsy.wav";
+			system(callLights);
 
+			mazeImage.drawMaze(maze, rowAndColumnToMoveDirection);
+
+			const char* mazeImageFilename = "mazey.bmp";
+			mazeImage.writeImageFile(mazeImageFilename);
+
+			system(mazeImageFilename);
+
+			std::cout << "Turn around and throw it in reverse (y/n)? \n";
+			std::string response; 
+			std::getline(std::cin, response); 
+
+			if (response == "y")
+			{
+				const char* callVicMensa = "reverse-VicMensa.wav";
+				system(callVicMensa);
+
+			}
+
+			std::cout << "Any key to continue\n";
+			std::cin.get(); 
 
 			needToBacktrack = true;
 			backtrack();
