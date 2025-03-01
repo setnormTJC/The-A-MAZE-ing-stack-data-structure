@@ -131,10 +131,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ImageBMP.cpp" />
     <ClCompile Include="Maze.cpp" />
     <ClCompile Include="The A-MAZE-ing stack data structure.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ImageBMP.h" />
     <ClInclude Include="Maze.h" />
     <ClInclude Include="scrappedFunctions.h" />
   </ItemGroup>

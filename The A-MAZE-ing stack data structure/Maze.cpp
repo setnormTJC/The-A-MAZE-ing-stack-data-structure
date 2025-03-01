@@ -17,19 +17,22 @@ std::vector<std::vector<char>> convert1DStringArrayTo2DCharArray(const std::vect
 	return maze;
 }
 
-void printMaze(const std::vector<std::vector<char>>& maze)
+void Maze::printMaze() const 
 {
 	for (const std::vector<char>& rowInMaze : maze)
 	{
 		for (const char character : rowInMaze)
 		{
-			std::cout << character;
+			if (character == 'C' || character == '2')
+				std::cout << "\033[31m" << character << "\033[0m"; // Red color
+			else
+				std::cout << character;
 		}
 		std::cout << "\n";
 	}
 }
 
-std::pair<int, int> getLocationOfCharacterIn2DMaze(const std::vector<std::vector<char>>& maze, const char theCharacterToFind)
+std::pair<int, int> Maze::getLocationOfCharacterIn2DMaze( const char theCharacterToFind) const 
 {
 	std::pair<int, int> charactersRowAndColumn = { -1,-1 };
 
@@ -51,19 +54,15 @@ std::pair<int, int> getLocationOfCharacterIn2DMaze(const std::vector<std::vector
 	return charactersRowAndColumn; //this will be -1, -1
 }
 
-std::map<std::string, char> getMapOfNeighbors(const std::pair<int, int>& currentRowAndColumn, const std::vector<std::vector<char>>& maze)
+void Maze::getMapOfNeighbors()
 {
-	std::map<std::string, char> mapOfNeighbors;
-
 	mapOfNeighbors["Down"] = maze[currentRowAndColumn.first + 1][currentRowAndColumn.second];
 	mapOfNeighbors["Left"] = maze[currentRowAndColumn.first][currentRowAndColumn.second - 1];
 	mapOfNeighbors["Right"] = maze[currentRowAndColumn.first][currentRowAndColumn.second + 1];
 	mapOfNeighbors["Up"] = maze[currentRowAndColumn.first - 1][currentRowAndColumn.second];
-
-	return mapOfNeighbors;
 }
 
-std::string getBacktrackingDirection(const std::string& lastDirection)
+std::string Maze::getBacktrackingDirection(const std::string& lastDirection) const
 
 {
 
@@ -95,53 +94,47 @@ std::string getBacktrackingDirection(const std::string& lastDirection)
 
 }
 
-void backtrack(std::vector<std::vector<char>>& maze, std::stack<std::string>& stackOfDirections, std::pair<int, int>& currentRowAndColumn, bool& needToBacktrack)
-
+void Maze::backtrack()
 {
 	if (needToBacktrack == false)
 	{
 		return;
 	}
 
-	else
+	while(!stackOfDirections.empty())
 	{
 		std::string lastDirection = stackOfDirections.top();
 		std::string backtrackingDirection = getBacktrackingDirection(lastDirection);
 		stackOfDirections.pop();
-		//stackOfDirections.push(backtrackingDirection);
 
 		//now move, check if still at a dead end, then make recursive call: 
 		std::cout << "\t\t\tBACKTRACKING " << backtrackingDirection << "\n"; 
 
-		moveToNextPosition(maze, currentRowAndColumn, backtrackingDirection);
-		printMaze(maze); 
+		moveToNextPosition(backtrackingDirection);  
+		printMaze(); 
 
-		std::map<std::string, char> mapOfNeighbors = getMapOfNeighbors(currentRowAndColumn, maze);
-		bool isNewMoveAvailable = addNextMoveToStackOfDirections(mapOfNeighbors, stackOfDirections);
+		getMapOfNeighbors();
+		bool isNewMoveAvailable = addNextMoveToStackOfDirections();
 
 		if (isNewMoveAvailable)
 		{
 			needToBacktrack = false;
 			return; //we have stepped back far enough that new path is available
 		}
-
-		else
-		{
-			needToBacktrack = true;
-			backtrack(maze, stackOfDirections, currentRowAndColumn, needToBacktrack);
-		}
-
 	}
+
+	std::cout << "No more moves left. Maze is unsolvable!\n";
+	throw std::runtime_error("Maze is unsolvable.");
 }
 
-bool addNextMoveToStackOfDirections(const std::map<std::string, char>& mapOfNeighbors, std::stack<std::string>& stackOfDirections)
+bool Maze::addNextMoveToStackOfDirections()
 
 {
 
 #if _MSVC_LANG >= 201703L
 	for (const auto& [direction, neighborInThatDirection] : mapOfNeighbors) //"structured bindings"
 	{
-		if (neighborInThatDirection != '#' && neighborInThatDirection != 'V')
+		if (neighborInThatDirection == ' ')
 		{
 			stackOfDirections.push(direction);
 			return true;
@@ -156,70 +149,103 @@ bool addNextMoveToStackOfDirections(const std::map<std::string, char>& mapOfNeig
 
 }
 
-void moveToNextPosition(std::vector<std::vector<char>>& maze, std::pair<int, int>& currentRowAndColumn, const std::string& nextDirection)
+void Maze::moveToNextPosition( const std::string& nextDirection)
 
 {
 
 	int currentRow = currentRowAndColumn.first;
 	int currentCol = currentRowAndColumn.second;
 
-	maze[currentRow][currentCol] = 'V'; // Mark as visited before moving
+	maze[currentRow][currentCol] = 'V';
 
-	if (nextDirection == "Up" && maze[currentRow - 1][currentCol] != '#')
+	/*unrelated if to that above: */
+	if (nextDirection == "Up" )
 	{
 		currentRowAndColumn = { currentRow - 1, currentCol };
 	}
-	else if (nextDirection == "Down" && maze[currentRow + 1][currentCol] != '#')
+	else if (nextDirection == "Down")
 	{
 		currentRowAndColumn = { currentRow + 1, currentCol };
 	}
-	else if (nextDirection == "Left" && maze[currentRow][currentCol - 1] != '#')
+	else if (nextDirection == "Left")
 	{
 		currentRowAndColumn = { currentRow, currentCol - 1 };
 	}
-	else if (nextDirection == "Right" && maze[currentRow][currentCol + 1] != '#')
+	else if (nextDirection == "Right")
 	{
 		currentRowAndColumn = { currentRow, currentCol + 1 };
 	}
 
-	maze[currentRowAndColumn.first][currentRowAndColumn.second] = 'C'; // Mark new position
+	// Mark current position with C if visiting for the first time, else mark with '2'
+	
+
+	maze[currentRowAndColumn.first][currentRowAndColumn.second] = 'C';
+	
 }
 
-void traverseMaze(std::vector<std::vector<char>> maze)
+
+void Maze::traverseMaze()
 
 {
-	std::pair<int, int> currentRowAndColumn = getLocationOfCharacterIn2DMaze(maze, 'S');
-
-	std::pair<int, int> goalRowAndColumn = getLocationOfCharacterIn2DMaze(maze, 'E');
-
-	std::stack<std::string> stackOfDirections;
 
 	while (currentRowAndColumn != goalRowAndColumn)
 	{
 		/*Ordering of neighbors: Down, Left, Right, Up (alphabetized by map key -> string)*/
-		std::map<std::string, char> mapOfNeighbors = getMapOfNeighbors(currentRowAndColumn, maze);
+		getMapOfNeighbors();
 
-		bool isNewMoveAvailable = addNextMoveToStackOfDirections(mapOfNeighbors, stackOfDirections);
+		bool isNewMoveAvailable = addNextMoveToStackOfDirections();
 
 		if (isNewMoveAvailable)
 		{
 			std::cout << "Moving " << stackOfDirections.top() << "\n";
 			//std::cin.get(); 
-			moveToNextPosition(maze, currentRowAndColumn, stackOfDirections.top());
+			moveToNextPosition(stackOfDirections.top());
 
-			printMaze(maze);
-			std::cout << "\n\n";
+			//printMaze();
+			//std::cout << "\n\n";
+
+			mazeImage.draw(maze); 
+
+			const char* mazeImageFilename = "mazey.bmp";
+			mazeImage.writeImageFile(mazeImageFilename);
+
+			system(mazeImageFilename);
+
 
 		}
 
 		else
 		{
 			std::cout << "\t\t\t\tDead end, dead end, dead end!\n";
-			bool needToBacktrack = true;
-			backtrack(maze, stackOfDirections, currentRowAndColumn, needToBacktrack);
+			needToBacktrack = true;
+			backtrack();
 		}
 
 	}
 
 }
 
+
+Maze::Maze(const std::vector<std::string>& stringMaze)
+{
+	maze = convert1DStringArrayTo2DCharArray(stringMaze);
+	currentRowAndColumn = getLocationOfCharacterIn2DMaze('S');
+	goalRowAndColumn = getLocationOfCharacterIn2DMaze('E');
+
+	//the image file stuff: 
+	mazeImage.setMazeImageDimensions( maze.size(), maze[0].size(), ColorEnum::Cyan);
+	
+
+	mazeImage.draw(maze); 
+
+	const char* mazeImageFilename = "mazey.bmp"; 
+	mazeImage.writeImageFile(mazeImageFilename); 
+
+	system(mazeImageFilename);
+
+}
+
+Maze::Maze(const int numberOfDesiredRows, const int numberOfDesiredColumns)
+{
+	//How do it do it? :)
+}

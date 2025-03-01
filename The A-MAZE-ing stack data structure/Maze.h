@@ -1,36 +1,61 @@
 #pragma once
-#include<array> 
-#include <iostream>
-#include <vector>
+
+#include "ImageBMP.h"
+
+
 #include <stack>
-#include <map>
 
 
+class Maze
+{
+private: 
+
+
+	/*******************************Private vars:***************************/
+	std::vector<std::vector<char>> maze; 
+	std::pair<int, int> currentRowAndColumn;
+	std::pair<int, int> goalRowAndColumn;
+
+	std::stack<std::string> stackOfDirections;
+	std::map<std::string, char> mapOfNeighbors;
+
+	bool needToBacktrack = false; 
+
+	//For visualization (and fun): 
+	MazeImageBMP mazeImage;
+
+	/*******************************Private funcs:***************************/
+	std::pair<int, int> getLocationOfCharacterIn2DMaze( const char theCharacterToFind) const;
+	std::string getBacktrackingDirection(const std::string& lastDirection) const;
+
+	void getMapOfNeighbors();
+	void backtrack();
+
+	/*Picks the first neighbor that is not a wall or a 'V' (as in "visited")
+	* @returns TRUE if a move was found -> FALSE if dead end was reached
+	*/
+	bool addNextMoveToStackOfDirections();
+
+	/*Updates the maze by placing a 'V' in previous position and a 'C' in next (new) position 
+	* @param -> symbolOfVisitation = 'V' if first visit, = '2' if revisiting 
+	*/
+	void moveToNextPosition(const std::string& nextDirection);
+
+public: 
+	Maze() = delete;
+	/*Converts the argument `stringMaze` (a 1D array) to a the private member var `maze` (a 2D char array)*/
+	Maze(const std::vector<std::string>& stringMaze);
+	/*The idea with this constructor is to generate some "random" (but SOLVABLE) maze for the client - using some fancy algorithm*/
+	Maze(const int numberOfDesiredRows, const int numberOfDesiredColumns);
+
+	void printMaze() const;
+
+	/*
+	@param maze -> passed BY VALUE in anticipation of modifying the copy (printing current position as 'C')
+	*/
+	void traverseMaze();
+
+};
+
+/*Non-member, helper method:*/
 std::vector<std::vector<char>> convert1DStringArrayTo2DCharArray(const std::vector<std::string>& stringMaze);
-
-void printMaze(const std::vector<std::vector<char>>& maze);
-
-std::pair<int, int> getLocationOfCharacterIn2DMaze(const std::vector<std::vector<char>>& maze, const char theCharacterToFind);
-
-
-std::map<std::string, char> getMapOfNeighbors(const std::pair<int, int>& currentRowAndColumn, const std::vector<std::vector<char>>& maze);
-
-
-std::string getBacktrackingDirection(const std::string& lastDirection);
-
-void backtrack(std::vector<std::vector<char>>& maze, std::stack<std::string>& stackOfDirections,
-	std::pair<int, int>& currentRowAndColumn, bool& needToBacktrack);
-
-/*Picks the first neighbor that is not a wall or a 'V' (as in "visited")
-* @returns TRUE if a move was found -> FALSE if dead end was reached
-*/
-bool addNextMoveToStackOfDirections(const std::map<std::string, char>& mapOfNeighbors, std::stack<std::string>& stackOfDirections);
-
-/*Updates the maze by placing a 'V' in previous position and a 'C' in next (new) position */
-void moveToNextPosition
-(std::vector<std::vector<char>>& maze, std::pair<int, int>& currentRowAndColumn, const std::string& nextDirection);
-
-/*
-@param maze -> passed BY VALUE in anticipation of modifying the copy (printing current position as 'C')
-*/
-void traverseMaze(std::vector<std::vector<char>> maze);

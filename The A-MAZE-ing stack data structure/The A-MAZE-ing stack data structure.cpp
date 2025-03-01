@@ -4,35 +4,46 @@
 
 int main()
 {
-	/*13 rows, 18 columns*/
-	std::vector<std::string> stringMaze = 
+	/*There are pros and cons of 1D string array versus 2D char array*/
+	//std::vector<std::string> stringMaze =
+	//{
+	//	"TTTTTTTTTTTTTTTTTT",
+	//	"LS           M   R",
+	//	"LMM M MMM MMM M MR",
+	//	"L   M   M   M M  R",
+	//	"L MMM MMM M M MM R",
+	//	"L     M M M M    R",
+	//	"LMMMM M M M MMMMMR",
+	//	"L   M M   M      R",
+	//	"L M M MMM MMMMMM R",
+	//	"L M   M       M  R",
+	//	"LMMMM MMMMMMMMM MR",
+	//	"L   M   M     M ER",
+	//	"BBBBBBBBBBBBBBBBBB"
+	//};
+
+	std::vector<std::string> stringMaze =
 	{
-		"##################",
-		"#S           #   #", //changed from 		"#S   #       #   #",
-		"### # ### ### # ##",
-		"#   #   #   # #  #",
-		"# ### ### # # ## #",
-		"#     # # # #    #",
-		"##### # # # ######",
-		"#   # #   #      #",
-		"# # # ### ###### #",
-		"# #   #       #  #",
-		"##### ######### ##",
-		"#   #   #     # E#",
-		"##################"
+		"WWWWWWWWWWWWWWWWWW",
+		"WS           W   W",
+		"WWWW W WWW WWW W W",
+		"W   W   W   W W  W",
+		"W WWW WWW W W WW W",
+		"W     W W W      W",
+		"WWWW W   WWWWWWW W",
+		"W     W   W      W",
+		"W W W WWW WWWWWW W",
+		"W W           W  W",
+		"WWWW WWWWWWWWWWW W",
+		"W             WWEW",
+		"WWWWWWWWWWWWWWWWWW"
 	};
-
-	//int COLUMNS_IN_MAZE = stringMaze[0].size(); 
-
-	std::vector<std::vector<char>> maze = 
-		convert1DStringArrayTo2DCharArray(stringMaze);
-	
-	//std::cout << "Row count: " << maze.size() << "\nColumn count: " << maze[0].size() << "\n";
-	//printMaze(maze); 
 
 	try
 	{
-		traverseMaze(maze); 
+		Maze maze(stringMaze); 
+
+		maze.traverseMaze(); 
 	}
 
 	catch (const std::exception& e)
