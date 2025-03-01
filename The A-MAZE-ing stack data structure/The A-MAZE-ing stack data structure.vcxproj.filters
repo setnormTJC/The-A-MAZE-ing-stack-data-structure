@@ -18,9 +18,15 @@
     <ClCompile Include="The A-MAZE-ing stack data structure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Maze.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scrappedFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Maze.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -131,9 +131,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Maze.cpp" />
     <ClCompile Include="The A-MAZE-ing stack data structure.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Maze.h" />
     <ClInclude Include="scrappedFunctions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
